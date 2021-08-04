@@ -32,12 +32,9 @@ def islisEmpty(list):
 def searchingSubString(state, pattern, stateTable, character ):
     patternlength = len(pattern)
     patternchars = list(set(pattern))
-    print(character)
     if character not in patternchars:
             character = 'anyCharacter'
     state = statetable[state][character]
-    print(statetable[state][character])
-    print(state)
     if state == patternLength:
         return True
     else:
