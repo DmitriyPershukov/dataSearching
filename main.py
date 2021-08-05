@@ -30,12 +30,13 @@ def islisEmpty(list):
     else:
         return True
 def searchingSubString(state, pattern, stateTable, character ):
-    patternlength = len(pattern)
+    patternLength = len(pattern)
     patternchars = list(set(pattern))
     if character not in patternchars:
             character = 'anyCharacter'
-    state = statetable[state][character]
-    if state == patternLength:
+    state[0] = stateTable[state[0]][character]
+    if state[0] == patternLength:
+        print(True)
         return True
     else:
         return False
@@ -52,25 +53,28 @@ def computeStateTable(pattern):
         for x in character:
             z = getNextState(pattern, state, x)
             stateTable[state][x] = z
-
+        
     return stateTable
-
 
 def searchLongSequences(f, positionCounter, startingPositionCounter, count, number):
     if number == "nan":
-        count = 0
+        count[0] = 0
         return
     if number >= 0:
-        if count == 0:                            
-            startingPositionCounter = positionCounter
-        count = count + 1
-        if count >= 32:
-            f.write(startingPositionCounter + ", ")
+        count[0] = count[0] +1
+        if count[0] == 0:                            
+            startingPositionCounter[0] = positionCounter
+    
+        if count[0] >= 32:
+            f.write(str(startingPositionCounter[0]) + ", ")
     else:
         count= 0
-with open('390393_16-21-00.tdata', 'rb') as file:
+#with open('390393_16-21-00.tdata',
+with open('Новый текстовый документ.txt','rb') as file:
     f = open("float.txt", "a")
     fd = open("doubl.txt", "a")
+    df = open("long long.txt", "a")
+    fkr = open("long.txt", "a")
     byte = file.read(1)
     count= 0
     p = "<?xm"
@@ -80,19 +84,23 @@ with open('390393_16-21-00.tdata', 'rb') as file:
     statetable = computeStateTable(p)
     eightByteStorer = b""
     fourByteStorer = b""
-    floatStartposition = 0
-    doubleStartPosition = 0 
+    floatStartposition = [0]
+    doubleStartPosition = [0]
+    longlongStartPosition = [0]
+    longStartPosition =[0]
     positionCounter = 0
-    floaCounter = 0
-    doubleCounter= 0
-    state = 0
-    
-    fState = 0
+    floaCounter = [0]
+    doubleCounter= [0]
+    longCounter =[0]
+    state = [0]
+    fState = [0]
     flagStateTable = {}
+
+    sko = True
     recordWord = ""
-    record = False
+    record = True
     passingmetadata = False
-    searchinFlag = False
+    searchingFlag = False
     while byte != b"":
 
         
@@ -100,7 +108,6 @@ with open('390393_16-21-00.tdata', 'rb') as file:
         if searchingSubString(state, p, statetable, character):
 
             passingmetadata = True
-        print(state)
         if passingmetadata:
             if  not searchingFlag and character == '<':
                 record = True
@@ -110,7 +117,7 @@ with open('390393_16-21-00.tdata', 'rb') as file:
                 recordWord += ">"
                 searchingFlag = True
                 flagStateTable = computeStateTable(recordWord)
-            if record and str(struct.unpack('s', byte))[3] == " " and str(struct.unpack('s', byte))[3] != "<":
+            if record and str(struct.unpack('s', byte))[3] != " " and str(struct.unpack('s', byte))[3] != "<":
                 recordWord = recordWord + str(struct.unpack('s', byte))[3]
             if searchingFlag:
                 characteyu = str(struct.unpack('s', byte))[3]
@@ -118,19 +125,29 @@ with open('390393_16-21-00.tdata', 'rb') as file:
                     searchingFlag = False
                     count = 0
                     passingmetaData = False
+                    print(str(struct.unpack('s', byte))[3])
+                    sko = True
         else:
             count += 1
             fourByteStorer = fourByteStorer + byte
             eightByteStorer += byte
             if count == 4:
-                data = struct.unpack('f', fourByteStorer)
 
+                data = struct.unpack('f', fourByteStorer)
+                
                 if str(data)[1:-2] == "nan":
                     numbe = "nan"
                 else:
                     numbe = float(str(data)[1:-2])
 
-                searchLongSequences(f,positionCounter, floatStartposition, floaCounter, numbe)
+                searchLongSequences(fkr,positionCounter, longStartPosition, longCounter, numbe)
+                data = struct.unpack('l', fourByteStorer)
+                if str(data)[1:-2] == "nan":
+                    number = "nan"
+                else:
+                    number = float(str(data)[1:-2])
+
+                searchLongSequences(f,positionCounter, floatStartposition, floaCounter, number)
                 fourByteStorer = b""
             if count == 8:
                 data = struct.unpack('f', fourByteStorer) 
@@ -154,9 +171,6 @@ with open('390393_16-21-00.tdata', 'rb') as file:
                 eightByteStorer = b""
         byte = file.read(1)
         positionCounter = positionCounter +1
-        if positionCounter == 100:
-            break
-        print(passingmetadata)
     f.close()
-
     fd.close()
+    fkr.close()
