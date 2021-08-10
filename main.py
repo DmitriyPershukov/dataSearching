@@ -23,48 +23,35 @@ def searchLongSequences(f, positionCounter, startingPositionCounter, count, numb
         count= 0
 with open('390393_16-21-00.tdata','rb') as file:
     f = open("float.txt", "a")
-    df = open("long long.txt", "a")
-    fkr = open("long.txt", "a")
     byte = file.read(1)
-    count= 0         
-
-    eightByteStorer = b""
-    fourByteStorer = b""
-    floatStartposition = [0, 0, 0, 0]
-    doubleStartPosition = [0]
-    longlongStartPosition = [0]
-    longStartPosition =[0, 0 ,0 0]
-    positionCounter = 0
-    floaCounter = [0]
-    doubleCounter= [0]
-    longCounter =[0]
-    counter = 0
     
     while byte != b"":
-        count += 1
-        fourByteStorer = fourByteStorer + byte
-        eightByteStorer += byte
-        if count == 4:
-
-            data = struct.unpack('f', fourByteStorer)
-                    
-                if str(data)[1:-2] == "nan":
-                    numbe = "nan"
-                else:
-                    numbe = float(str(data)[1:-2])
-
-                searchLongSequences(fkr,positionCounter, longStartPosition, longCounter, numbe)
-                data = struct.unpack('l', fourByteStorer)
-                if str(data)[1:-2] == "nan":
-                    number = "nan"
-                else:
-                    number = float(str(data)[1:-2])
-
-                searchLongSequences(f,positionCounter, floatStartposition, floaCounter, number)
-                fourByteStorer = b""
-        if count == 8:
+        byteStorer.append(byte)
         byte = file.read(1)
-        positionCounter = positionCounter +1
+
+    bytetorerlen = len(byteStorer)
+    for j in  range(bytetorerlen):
+        byteStore = []
+        for p in range(32):
+            fourByteStorer = b""
+            offset = 4 * p
+            for i in range(j +offset, j + 4 + 4 * p):
+                fourByteStorer += byteStorer[i]
+            data = struct.unpack('f', fourByteStorer)
+            if str(data)[1:-2] == "nan":
+                number = -3
+            else:
+                number = float(str(data)[1:-2])
+            byteStore.append(number)
+
+        passing = True
+        for i in byteStore:
+            if i >=0 :
+                passin = True
+            else:
+                passin = False
+        if passin:
+            fkr.write(str(j) + ",  ")
     f.close()
-    fd.close()
     fkr.close()
+    fd.close()
