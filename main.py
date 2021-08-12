@@ -1,4 +1,6 @@
+
 import struct, os
+import json
 
 from decimal import Decimal 
             
@@ -21,37 +23,44 @@ def searchLongSequences(f, positionCounter, startingPositionCounter, count, numb
             f.write(str(startingPositionCounter[0]) + ", ")
     else:
         count= 0
+
+def get(i):
+    return bytes([byte[i]])
 with open('390393_16-21-00.tdata','rb') as file:
     f = open("float.txt", "a")
-    byte = file.read(1)
-    
-    while byte != b"":
-        byteStorer.append(byte)
-        byte = file.read(1)
-
-    bytetorerlen = len(byteStorer)
-    for j in  range(bytetorerlen):
-        byteStore = []
-        for p in range(32):
-            fourByteStorer = b""
-            offset = 4 * p
-            for i in range(j +offset, j + 4 + 4 * p):
-                fourByteStorer += byteStorer[i]
-            data = struct.unpack('f', fourByteStorer)
-            if str(data)[1:-2] == "nan":
-                number = -3
-            else:
-                number = float(str(data)[1:-2])
-            byteStore.append(number)
-
-        passing = True
-        for i in byteStore:
-            if i >=0 :
-                passin = True
-            else:
-                passin = False
-        if passin:
-            fkr.write(str(j) + ",  ")
+    result = []
+    byteStorer = b""
+    byteStorer = file.read()
+    counter = 0
+    binarySize = 4
+    bytetorerlen = os.stat('390393_16-21-00.tdata').st_size
+    for p in range(0, binarySize):
+        counter = 0
+        firs = 0
+        coun = 0
+        fourBytesStorer = b""
+        passing = False
+        for j in  range(p, bytetorerlen):
+            coun = coun + 1
+            fourBytesStorer +=  bytes([byteStorer[j]])
+            if coun == binarySize:
+                data = struct.unpack('f', fourBytesStorer)
+                coun = 0
+                fourBytesStorer = b""
+                if str(data)[1:-2] == "nan":
+                    number = -2
+                else:
+                    number = float(str(data)[1:-2])
+                gi = bytetorerlen
+                if number >= 0:
+                    counter = counter + 1
+                    if not passing:
+                        firs = j
+                    passing = True
+                elif number <0 or j ==gi:
+                    passing = False
+                    if counter >= 32:
+                        result.append({"pos": j, "len": counter})
+                    counter = 0
+    f.write(json.dumps(result))
     f.close()
-    fkr.close()
-    fd.close()
