@@ -1,6 +1,5 @@
 
 import struct, os
-
 import json
 
 from decimal import Decimal 
@@ -52,15 +51,18 @@ with open('390393_16-21-00.tdata','rb') as file:
                     number = -2
                 else:
                     number = float(str(data)[1:-2])
+                gi = bytetorerlen
                 if number >= 0:
-                    counter  == counter + 1
+                    counter = counter + 1
                     if not passing:
                         firs = j
                     passing = True
-                else:
+                elif number <0 or j ==gi:
                     passing = False
                     if counter >= 32:
-                         result.append({"pos": j, "len": counter})
+                        result.append({"pos": j, "len": counter})
                     counter = 0
     f.write(json.dumps(result))
     f.close()
+
+    
